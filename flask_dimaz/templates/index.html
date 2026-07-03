@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiabetaCheck — Sistem Prediksi Diabetes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface2: #f1f5f9;
+            --border: rgba(15, 23, 42, 0.06);
+            --accent: #059669;
+            /* Emerald Green yang lebih kontras untuk tema cerah */
+            --accent-rgb: 5, 150, 105;
+            --accent2: #6366f1;
+            /* Indigo Blue */
+            --accent2-rgb: 99, 102, 241;
+            --danger: #dc2626;
+            --text: #0f172a;
+            --muted: #64748b;
+            --radius: 20px;
+        }
+
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.06) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        /* === HEADER === */
+        .header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(5, 150, 105, 0.06);
+            border: 1px solid rgba(5, 150, 105, 0.15);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 8px 18px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px rgba(5, 150, 105, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(1.4);
+            }
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(32px, 6vw, 46px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 15px;
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* === CARD === */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 30px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06);
+            border-color: rgba(15, 23, 42, 0.1);
+        }
+
+        .card-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .card-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .card-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #1e293b;
+        }
+
+        .card-body {
+            padding: 32px;
+        }
+
+        /* === ALGORITHM TOGGLE === */
+        .algo-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px;
+            gap: 6px;
+        }
+
+        .algo-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .algo-btn:hover {
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .algo-btn.active {
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        .algo-btn.active[data-algo="dt"] {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .algo-btn.active[data-algo="svc"] {
+            background: var(--accent2);
+            color: #fff;
+        }
+
+        /* === GRID === */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 24px;
+            row-gap: 20px;
+        }
+
+        @media (max-width: 540px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-body {
+                padding: 24px;
+            }
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 12px 65px 12px 16px;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.25s;
+            -moz-appearance: textfield;
+        }
+
+        .input-wrap input::-webkit-outer-spin-button,
+        .input-wrap input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .input-wrap input:focus {
+            border-color: rgba(var(--theme-rgb, var(--accent-rgb)), 0.8);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(var(--theme-rgb, var(--accent-rgb)), 0.12);
+        }
+
+        .input-wrap input::placeholder {
+            color: #94a3b8;
+        }
+
+        .unit {
+            position: absolute;
+            right: 16px;
+            font-size: 11px;
+            color: var(--muted);
+            pointer-events: none;
+            font-weight: 600;
+            background: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* === SUBMIT === */
+        .btn-submit {
+            width: 100%;
+            margin-top: 32px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent), #0284c7);
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(5, 150, 105, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* === RESULT === */
+        .result-card {
+            border-radius: var(--radius);
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin-bottom: 30px;
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card.positif {
+            background: rgba(220, 38, 38, 0.04);
+            border-color: rgba(220, 38, 38, 0.2);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.05);
+        }
+
+        .result-card.negatif {
+            background: rgba(5, 150, 105, 0.04);
+            border-color: rgba(5, 150, 105, 0.2);
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.05);
+        }
+
+        .result-icon-wrap {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .result-card.positif .result-icon-wrap {
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .result-card.negatif .result-icon-wrap {
+            background: rgba(5, 150, 105, 0.15);
+        }
+
+        .result-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .result-card.positif .result-text {
+            color: var(--danger);
+        }
+
+        .result-card.negatif .result-text {
+            color: var(--accent);
+        }
+
+        .result-desc {
+            font-size: 13px;
+            color: #475569;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        /* === FOOTER === */
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        #algo-input {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="badge">Machine Learning · Klasifikasi</div>
+            <h1>Diabeta<span>Check</span></h1>
+            <p class="subtitle">Analisis probabilitas diabetes berdasarkan data fisiologis menggunakan model ML
+                terlatih.</p>
+        </div>
+
+        {% if prediction_text %}
+        <div class="result-card {{ 'positif' if 'Positif' in prediction_text else 'negatif' }}">
+            <div class="result-icon-wrap">
+                {{ '⚠️' if 'Positif' in prediction_text else '✅' }}
+            </div>
+            <div>
+                <div class="result-label">Hasil Analisis Medis</div>
+                <div class="result-text">{{ prediction_text }}</div>
+                <div class="result-desc">
+                    {% if 'Positif' in prediction_text %}
+                    Kondisi tubuh terdeteksi memiliki indikasi diabetes. Disarankan untuk segera berkonsultasi dengan
+                    profesional medis.
+                    {% else %}
+                    Kondisi tubuh dianalisis berada dalam batas normal. Tetap pertahankan pola hidup sehat dan lakukan
+                    pemeriksaan berkala.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form action="/predict" method="POST">
+            <input type="hidden" name="algorithm" id="algo-input" value="dt">
+
+            <div class="card" id="algo-card">
+                <div class="card-header">
+                    <div class="card-header-icon" style="background:rgba(99,102,241,0.1)">🧠</div>
+                    <h2>Algoritma Klasifikasi</h2>
+                </div>
+                <div class="card-body">
+                    <div class="algo-toggle">
+                        <button type="button" class="algo-btn active" data-algo="dt" onclick="setAlgo(this,'dt')">
+                            🌿 Decision Tree
+                        </button>
+                        <button type="button" class="algo-btn" data-algo="svc" onclick="setAlgo(this,'svc')">
+                            ⚡ Support Vector Machine
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-icon" style="background:rgba(5, 150, 105, 0.08)">📊</div>
+                    <h2>Metrik Data Fisiologis</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid">
+                        <div class="field">
+                            <label>Glucose (Kadar Gula)</label>
+                            <div class="input-wrap">
+                                <input type="number" name="Glucose" placeholder="Contoh: 120" required>
+                                <span class="unit">mg/dL</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Blood Pressure (Tekanan Darah)</label>
+                            <div class="input-wrap">
+                                <input type="number" name="BloodPressure" placeholder="Contoh: 80" required>
+                                <span class="unit">mmHg</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Insulin (Kadar Insulin)</label>
+                            <div class="input-wrap">
+                                <input type="number" name="Insulin" placeholder="Contoh: 79" required>
+                                <span class="unit">μU/mL</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Skin Thickness (Tebal Kulit)</label>
+                            <div class="input-wrap">
+                                <input type="number" name="SkinThickness" placeholder="Contoh: 20" required>
+                                <span class="unit">mm</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>BMI (Indeks Massa Tubuh)</label>
+                            <div class="input-wrap">
+                                <input type="number" step="0.1" name="BMI" placeholder="Contoh: 26.5" required>
+                                <span class="unit">kg/m²</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Pedigree Function</label>
+                            <div class="input-wrap">
+                                <input type="number" step="0.001" name="DiabetesPedigreeFunction"
+                                    placeholder="Contoh: 0.352" required>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Pregnancies (Kehamilan)</label>
+                            <div class="input-wrap">
+                                <input type="number" name="Pregnancies" placeholder="Contoh: 0" required>
+                                <span class="unit">kali</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Age (Usia Pasien)</label>
+                            <div class="input-wrap">
+                                <input type="number" name="Age" placeholder="Contoh: 30" required>
+                                <span class="unit">tahun</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submit-btn">Analisis Data Pasien →</button>
+                </div>
+            </div>
+        </form>
+
+        <p class="footer">DiabetaCheck · Dashboard Analitik ML · Komputasi Awan</p>
+    </div>
+
+    <script>
+        function setAlgo(btn, algo) {
+            document.querySelectorAll('.algo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('algo-input').value = algo;
+
+            const root = document.documentElement;
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (algo === 'dt') {
+                root.style.setProperty('--theme-rgb', '5, 150, 105');
+                submitBtn.style.background = 'linear-gradient(135deg, var(--accent), #0284c7)';
+                submitBtn.style.boxShadow = '0 8px 20px rgba(5, 150, 105, 0.25)';
+            } else {
+                root.style.setProperty('--theme-rgb', '99, 102, 241');
+                submitBtn.style.background = 'linear-gradient(135deg, var(--accent2), #4f46e5)';
+                submitBtn.style.boxShadow = '0 8px 20px rgba(99, 102, 241, 0.25)';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
